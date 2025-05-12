@@ -63,9 +63,19 @@ module Hangman
         loop do
           get_letter_from_player(ask_player(("a".."z").to_a, "type a letter to guess or type 'save' to save the game"))
           display_game_progress
-          # check_value_of_instance_variables
-          
-          break if  check_win
+          break if check_win
+        end
+        ask_player_about_replay
+      end
+
+      def ask_player_about_replay
+        answer = ask_player(['y','n'],"Do you want to replay the game? \n type 'y' to replay or type 'n' to stop")
+        if answer == 'y'
+          set_data_for_new_game
+          play_game
+
+        else
+          puts "game over"
         end
       end
 
