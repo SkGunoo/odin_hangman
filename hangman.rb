@@ -1,5 +1,5 @@
 require 'yaml'
-
+require 'colorize'
 
 module Hangman
   
@@ -19,7 +19,7 @@ module Hangman
       end
 
       def get_data(game_mode)
-        if game_mode == 0 
+        if game_mode == 
           set_data_for_new_game
         elsif save_data_exist?
           load_data_from_saved_game()
@@ -59,7 +59,7 @@ module Hangman
 
       def ask_player_about_new_game_or_load_game
         puts " HI, welcome to Hangman"
-          answer = ask_player(["0","1"], "     type '0' for new game or type '1' to load saved game")
+          answer = ask_player(["1","2"], "     type '1' for new game or type '2' to load saved game")
           answer.to_i
       end
 
@@ -88,7 +88,7 @@ module Hangman
         #show game progress before start the game
         display_game_progress
         loop do
-          get_letter_from_player(ask_player(("a".."z").to_a, "type a letter to guess or type 'save' to save the game"))
+          get_letter_from_player(ask_player(("a".."z").to_a, "\ntype a letter to guess or type 'save' to save the game"))
           display_game_progress
           break if check_win
         end
@@ -96,18 +96,19 @@ module Hangman
       end
 
       def ask_player_about_replay
-        answer = ask_player(['y','n'],"Do you want to replay the game? \n type 'y' to replay or type 'n' to stop")
-        if answer == 'y'
+        answer = ask_player(['1','2'],"Do you want to replay the game? \n type " + '" 1 "'.colorize(:yellow) + " to replay or type " + '" 2 "'.colorize(:yellow) + " to stop")
+        if answer == '1'
           set_data_for_new_game
+          puts "New game started guess a new word!".colorize(:yellow)
           play_game
 
         else
-          puts "game over"
+          puts "Goodbye"
         end
       end
 
       def draw_pyramid(turn, height)
-        symbol_array = Array.new(height) { |e| e >= turn ? "□" : "▣"}
+        symbol_array = Array.new(height) { |e| e >= turn ? "□" : "▣".colorize(:yellow)}
         num_of_rows = (0..height).to_a
         num_of_rows.each do |num|
           ((height - num) + 10).times {print " "}
@@ -118,19 +119,19 @@ module Hangman
 
 
       def display_game_progress
-        print "\n \nyour word guess progress: [ #{@word_guessing_progress.join(" ")} ]"
-        puts "   wrong guesses: [ #{@wrong_letters.sort.join(' ')}]"
+        print "\n \nYour word guessing progress: [ #{@word_guessing_progress.join(" ").colorize(:red)} ]"
+        puts "   Wrong guesses: [ #{@wrong_letters.sort.join(' ')}]"
       end
 
       def check_win
         #ask for replay if player won the game 
         if @word_guessing_progress.join() == word_to_guess
-          puts 'YOU WON THE GAME!!!!'
+          puts 'YOU WON THE GAME!!!!'.colorize(:yellow)
           true
         elsif @number_of_fails == 10
           draw_pyramid(number_of_fails, 11)
-          puts "Pyramid is now FULLY charged you are LOST!" 
-          puts "The answer was : #{word_to_guess}"
+          puts "Pyramid is now FULLY charged you are LOST!\n".colorize(:yellow)
+          puts "The answer was : #{word_to_guess.colorize(:red)}"
           true
         else
           false
@@ -139,10 +140,10 @@ module Hangman
 
       def get_letter_from_player(letter)
         if word_to_guess.include?(letter)
-          # puts "haha"
+          puts "\nYou guessed correctly!, guess another one!".colorize(:yellow)
           add_letter_to_letter_to_progress(letter)
-        elsif letter == 'save'
-          puts" game saved!"
+        elsif letter.downcase == 'save'
+          puts" Game saved!"
           save_the_game
           exit
         else
@@ -150,7 +151,7 @@ module Hangman
           @wrong_letters.push(letter)
           @number_of_fails += 1
           draw_pyramid(number_of_fails, 11)
-          puts "\n your guess is WRONG! Pyraid is charging up.... \n you don't want pyramid to be fully charged!"
+          puts "\n Your guess is WRONG! Pyraid is charging up.... \n you don't want pyramid to be fully charged!".colorize(:red)
         end
       end
 
