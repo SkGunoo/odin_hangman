@@ -1,3 +1,6 @@
+require 'yaml'
+
+
 module Hangman
   
     class Game
@@ -18,9 +21,33 @@ module Hangman
       def get_data(game_mode)
         if game_mode == 0 
           set_data_for_new_game
-        else
+        elsif save_data_exist?
           load_data_from_saved_game()
+        else
+          puts "there is no saved file, starting a new game"
+          set_data_for_new_game
         end
+      end
+
+      def save_data_exist?
+          f = File.open("hangman_data.yaml",'r')
+          if f.size == 0 
+            false
+          else
+            true
+          end
+      end
+
+      def load_data_from_saved_game
+        f = File.open("hangman_data.yaml",'r+')
+        data = YAML.load(f)
+        @wrong_letters = data[:wrong_letters]
+        @word_to_guess = data[:word_to_guess]
+        @word_guessing_progress = data[:word_guessing_progress]
+        @number_of_fails = data[:number_of_fails]
+        puts "game loaded sucessfully "
+        f.truncate(0)
+        f.close
       end
 
       def set_data_for_new_game
@@ -116,7 +143,8 @@ module Hangman
           add_letter_to_letter_to_progress(letter)
         elsif letter == 'save'
           puts" game saved!"
-          #save the game
+          save_the_game
+          exit
         else
           #add the letter picked by user to wrong letters
           @wrong_letters.push(letter)
@@ -124,6 +152,20 @@ module Hangman
           draw_pyramid(number_of_fails, 11)
           puts "\n your guess is WRONG! Pyraid is charging up.... \n you don't want pyramid to be fully charged!"
         end
+      end
+
+      def save_the_game
+        f = File.new("hangman_data.yaml", "w")
+
+        data = YAML.dump({
+          word_to_guess: @word_to_guess,
+          word_guessing_progress: @word_guessing_progress,
+          number_of_fails: @number_of_fails,
+          wrong_letters: @wrong_letters
+
+        })
+
+        f.puts data
       end
 
       def add_letter_to_letter_to_progress(letter)
